@@ -322,3 +322,21 @@ func (q Querier) EstimateSwapExactAmountOut(ctx context.Context, req *types.Quer
 		TokenInAmount: tokenInAmount,
 	}, nil
 }
+
+func (q Querier) JoinPool(ctx context.Context, req *types.QueryJoinPoolRequest) (*types.QueryJoinPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	numShares, numLiquidity, err := q.Keeper.GetJoinPoolShares(sdkCtx, req.PoolId, req.TokenInMaxs)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryJoinPoolResponse{
+		ShareOutAmount: numShares,
+		TokenIn:        numLiquidity,
+	}, nil
+}

@@ -258,3 +258,16 @@ func (k Keeper) getNextPoolIdAndIncrement(ctx sdk.Context) uint64 {
 	k.setNextPoolId(ctx, nextPoolId+1)
 	return nextPoolId
 }
+
+func (k Keeper) GetJoinPoolShares(ctx sdk.Context, poolId uint64, tokenInMaxs []sdk.Coin) (sdk.Int, sdk.Coins, error) {
+	pool, err := k.GetPoolAndPoke(ctx, poolId)
+	if err != nil {
+		return sdk.ZeroInt(), sdk.NewCoins(), err
+	}
+
+	swapFee := pool.GetSwapFee(ctx)
+
+	numShares, numLiquidity, err := pool.CalcJoinPoolShares(ctx, tokenInMaxs, swapFee)
+
+	return numShares, numLiquidity, err
+}

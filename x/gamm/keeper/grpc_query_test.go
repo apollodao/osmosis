@@ -295,3 +295,29 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 		})
 	}
 }
+
+func (suite *KeeperTestSuite) TestJoinPool() {
+	poolId := suite.PrepareBalancerPool()
+
+	incorrectAssets := sdk.NewCoins(sdk.NewCoin("random", sdk.NewInt(100)))
+
+	// assets not in pool
+	_, err := suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: incorrectAssets})
+	suite.Require().Error(err)
+
+	singleAsset := sdk.NewCoins(sdk.NewCoin("uosmo", sdk.NewInt(100)))
+
+	// single asset join
+	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: singleAsset})
+	suite.Require().NoError(err)
+
+	multiAssets := sdk.NewCoins(sdk.NewCoin("uosmo", sdk.NewInt(1000)), sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000)), sdk.NewCoin("baz", sdk.NewInt(1000)))
+
+	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: multiAssets})
+	suite.Require().NoError(err)
+
+	incorrectAssets = sdk.NewCoins(sdk.NewCoin("uosmo", sdk.NewInt(1000)), sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000)), sdk.NewCoin("baz", sdk.NewInt(1000)))
+
+	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: incorrectAssets})
+	suite.Require().NoError(err)
+}

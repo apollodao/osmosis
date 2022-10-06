@@ -73,6 +73,11 @@ service Query {
     option (google.api.http).get =
         "/osmosis/gamm/v1beta1/{pool_id}/estimate/swap_exact_amount_out";
   }
+
+  // JoinPool returns the amount of lp shares minted to the user given tokens.
+  rpc JoinPool(QueryJoinPoolRequest) returns (QueryJoinPoolResponse) {
+    option (google.api.http).get = "/osmosis/gamm/v1beta1/{pool_id}/join_pool";
+  }
 }
 
 //=============================== Pool
@@ -203,6 +208,26 @@ message QueryTotalLiquidityResponse {
   repeated cosmos.base.v1beta1.Coin liquidity = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
     (gogoproto.moretags) = "yaml:\"liquidity\"",
+    (gogoproto.nullable) = false
+  ];
+}
+
+//=============================== JoinPool
+message QueryJoinPoolRequest {
+  uint64 pool_id = 1 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
+  repeated cosmos.base.v1beta1.Coin token_in_maxs = 2 [
+    (gogoproto.moretags) = "yaml:\"token_in_maxs\"",
+    (gogoproto.nullable) = false
+  ];
+}
+message QueryJoinPoolResponse {
+  string share_out_amount = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.moretags) = "yaml:\"share_out_amount\"",
+    (gogoproto.nullable) = false
+  ];
+  repeated cosmos.base.v1beta1.Coin token_in = 2 [
+    (gogoproto.moretags) = "yaml:\"token_in\"",
     (gogoproto.nullable) = false
   ];
 }
