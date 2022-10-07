@@ -271,3 +271,17 @@ func (k Keeper) GetJoinPoolShares(ctx sdk.Context, poolId uint64, tokenInMaxs []
 
 	return numShares, numLiquidity, err
 }
+
+func (k Keeper) GetExitPoolShares(ctx sdk.Context, poolId uint64, shareInAmount sdk.Int) (sdk.Coins, error) {
+	pool, err := k.GetPoolAndPoke(ctx, poolId)
+
+	if err != nil {
+		return sdk.NewCoins(), err
+	}
+
+	swapFee := pool.GetSwapFee(ctx)
+
+	returnedCoins, err := pool.CalcExitPoolCoinsFromShares(ctx, shareInAmount, swapFee)
+
+	return returnedCoins, err
+}

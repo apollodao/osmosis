@@ -296,7 +296,7 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 	}
 }
 
-func (suite *KeeperTestSuite) TestJoinPool() {
+func (suite *KeeperTestSuite) TestQueryJoinPool() {
 	poolId := suite.PrepareBalancerPool()
 
 	incorrectAssets := "100random"
@@ -320,4 +320,23 @@ func (suite *KeeperTestSuite) TestJoinPool() {
 
 	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: correctInbalancedAssets})
 	suite.Require().NoError(err)
+}
+
+func (suite *KeeperTestSuite) TestQueryExitPool() {
+	poolId := suite.PrepareBalancerPool()
+
+	res, err := suite.queryClient.TotalShares(gocontext.Background(), &types.QueryTotalSharesRequest{PoolId: poolId})
+	suite.Require().NoError(err)
+	suite.Require().Equal(types.InitPoolSharesSupply.String(), res.TotalShares.Amount.String())
+
+	tenPercentOfShares := res.TotalShares.Amount.Quo(sdk.NewInt(10))
+
+	// assets not in pool
+	exitPoolRes, err := suite.queryClient.ExitPool(gocontext.Background(), &types.QueryExitPoolRequest{PoolId: poolId, ShareInAmount: tenPercentOfShares.String()})
+	suite.Require().NoError(err)
+
+	// 5 million of each token, 500000 expected
+	expectedCoins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(500000)), sdk.NewCoin("baz", sdk.NewInt(500000)), sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("uosmo", sdk.NewInt(500000))}
+
+	suite.Require().Equal(expectedCoins, exitPoolRes.TokenOut)
 }

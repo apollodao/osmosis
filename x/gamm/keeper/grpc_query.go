@@ -376,3 +376,27 @@ func (q Querier) EstimateJoinSwapExternAmountIn(ctx context.Context, req *types.
 		ShareOutAmount: shareOutAmount,
 	}, nil
 }
+
+func (q Querier) ExitPool(ctx context.Context, req *types.QueryExitPoolRequest) (*types.QueryExitPoolResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	if req.ShareInAmount == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+
+	shareInAmountInt, ok := sdk.NewIntFromString(req.ShareInAmount)
+
+	if !ok {
+		return nil, fmt.Errorf("invalid share in amount")
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	returnedCoins, err := q.Keeper.GetExitPoolShares(sdkCtx, req.PoolId, shareInAmountInt)
+
+	return &types.QueryExitPoolResponse{
+		TokenOut: returnedCoins,
+	}, err
+}

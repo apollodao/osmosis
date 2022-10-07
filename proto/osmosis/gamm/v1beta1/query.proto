@@ -76,7 +76,8 @@ service Query {
 
   // JoinPool returns the amount of lp shares minted to the user given tokens.
   rpc JoinPool(QueryJoinPoolRequest) returns (QueryJoinPoolResponse) {
-    option (google.api.http).get = "/osmosis/gamm/v1beta1/{pool_id}/join_pool";
+    option (google.api.http).get =
+        "/osmosis/gamm/v1beta1/{pool_id}/estimate/join_pool";
   }
 
   // Estimates the number of shares to get from a JoinSwapExternAmountIn
@@ -84,6 +85,12 @@ service Query {
       returns (QueryJoinSwapExternAmountInResponse) {
     option (google.api.http).get =
         "/osmosis/gamm/v1beta1/{pool_id}/estimate/join_swap_extern_amount_in";
+  }
+
+  // Estimates the amount of tokens to get from ExitPool
+  rpc ExitPool(QueryExitPoolRequest) returns (QueryExitPoolResponse) {
+    option (google.api.http).get =
+        "/osmosis/gamm/v1beta1/{pool_id}/estimate/exit_pool";
   }
 }
 
@@ -246,6 +253,19 @@ message QueryJoinSwapExternAmountInResponse {
   string share_out_amount = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.moretags) = "yaml:\"share_out_amount\"",
+    (gogoproto.nullable) = false
+  ];
+}
+
+//=============================== ExitPool
+message QueryExitPoolRequest {
+  uint64 pool_id = 1 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
+  string share_in_amount = 2
+      [ (gogoproto.moretags) = "yaml:\"share_in_amount\"" ];
+}
+message QueryExitPoolResponse {
+  repeated cosmos.base.v1beta1.Coin token_out = 1 [
+    (gogoproto.moretags) = "yaml:\"token_out\"",
     (gogoproto.nullable) = false
   ];
 }
