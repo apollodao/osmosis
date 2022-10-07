@@ -329,7 +329,14 @@ func (q Querier) JoinPool(ctx context.Context, req *types.QueryJoinPoolRequest) 
 	}
 
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	numShares, numLiquidity, err := q.Keeper.GetJoinPoolShares(sdkCtx, req.PoolId, req.TokenInMaxs)
+
+	normalizedTokens, err := sdk.ParseCoinsNormalized(req.TokenInMaxs)
+
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid token: %s", err.Error())
+	}
+
+	numShares, numLiquidity, err := q.Keeper.GetJoinPoolShares(sdkCtx, req.PoolId, normalizedTokens)
 
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

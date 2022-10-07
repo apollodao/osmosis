@@ -222,10 +222,7 @@ message QueryTotalLiquidityResponse {
 //=============================== JoinPool
 message QueryJoinPoolRequest {
   uint64 pool_id = 1 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
-  repeated cosmos.base.v1beta1.Coin token_in_maxs = 2 [
-    (gogoproto.moretags) = "yaml:\"token_in_maxs\"",
-    (gogoproto.nullable) = false
-  ];
+  string token_in_maxs = 2 [ (gogoproto.moretags) = "yaml:\"token_in_maxs\"" ];
 }
 message QueryJoinPoolResponse {
   string share_out_amount = 1 [

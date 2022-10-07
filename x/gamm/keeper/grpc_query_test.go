@@ -299,25 +299,25 @@ func (suite *KeeperTestSuite) TestQueryBalancerPoolSpotPrice() {
 func (suite *KeeperTestSuite) TestJoinPool() {
 	poolId := suite.PrepareBalancerPool()
 
-	incorrectAssets := sdk.NewCoins(sdk.NewCoin("random", sdk.NewInt(100)))
+	incorrectAssets := "100random"
 
 	// assets not in pool
 	_, err := suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: incorrectAssets})
 	suite.Require().Error(err)
 
-	singleAsset := sdk.NewCoins(sdk.NewCoin("uosmo", sdk.NewInt(100)))
+	singleAsset := "100uosmo"
 
 	// single asset join
 	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: singleAsset})
 	suite.Require().NoError(err)
 
-	multiAssets := sdk.NewCoins(sdk.NewCoin("uosmo", sdk.NewInt(1000)), sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000)), sdk.NewCoin("baz", sdk.NewInt(1000)))
+	multiAssets := "1000uosmo,1000foo,1000bar,1000baz"
 
 	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: multiAssets})
 	suite.Require().NoError(err)
 
-	incorrectAssets = sdk.NewCoins(sdk.NewCoin("uosmo", sdk.NewInt(1000)), sdk.NewCoin("foo", sdk.NewInt(1000)), sdk.NewCoin("bar", sdk.NewInt(1000)), sdk.NewCoin("baz", sdk.NewInt(1000)))
+	correctInbalancedAssets := "5000uosmo,1000foo,1000bar,1000baz"
 
-	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: incorrectAssets})
+	_, err = suite.queryClient.JoinPool(gocontext.Background(), &types.QueryJoinPoolRequest{PoolId: poolId, TokenInMaxs: correctInbalancedAssets})
 	suite.Require().NoError(err)
 }
