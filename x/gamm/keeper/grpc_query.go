@@ -340,3 +340,32 @@ func (q Querier) JoinPool(ctx context.Context, req *types.QueryJoinPoolRequest) 
 		TokenIn:        numLiquidity,
 	}, nil
 }
+
+func (q Querier) EstimateJoinSwapExternAmountIn(ctx context.Context, req *types.QueryJoinSwapExternAmountInRequest) (*types.QueryJoinSwapExternAmountInResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	if req.TokenIn == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+
+	tokenIn, err := sdk.ParseCoinNormalized(req.TokenIn)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid token: %s", err.Error())
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	tokensIn := sdk.Coins{tokenIn}
+	pool, err := q.Keeper.getPoolForSwap(sdkCtx, req.PoolId)
+	shareOutAmount, err := pool.JoinPool(sdkCtx, tokensIn, pool.GetSwapFee(sdkCtx))
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryJoinSwapExternAmountInResponse{
+		ShareOutAmount: shareOutAmount,
+	}, nil
+}
