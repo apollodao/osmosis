@@ -340,3 +340,22 @@ func (suite *KeeperTestSuite) TestQueryExitPool() {
 
 	suite.Require().Equal(expectedCoins, exitPoolRes.TokenOut)
 }
+
+func (suite *KeeperTestSuite) TestQueryExitSwapShareAmountIn() {
+	poolId := suite.PrepareBalancerPool()
+
+	res, err := suite.queryClient.TotalShares(gocontext.Background(), &types.QueryTotalSharesRequest{PoolId: poolId})
+	suite.Require().NoError(err)
+	suite.Require().Equal(types.InitPoolSharesSupply.String(), res.TotalShares.Amount.String())
+
+	tenPercentOfShares := res.TotalShares.Amount.Quo(sdk.NewInt(10))
+
+	// assets not in pool
+	exitPoolRes, err := suite.queryClient.ExitSwapShareAmountIn(gocontext.Background(), &types.QueryExitSwapShareAmountInRequest{PoolId: poolId, TokenOutDenom: "uosmo", ShareInAmount: tenPercentOfShares.String()})
+	suite.Require().NoError(err)
+
+	// 5 million of each token, 500000 expected
+	expectedCoins := []sdk.Coin{sdk.NewCoin("bar", sdk.NewInt(500000)), sdk.NewCoin("baz", sdk.NewInt(500000)), sdk.NewCoin("foo", sdk.NewInt(500000)), sdk.NewCoin("uosmo", sdk.NewInt(500000))}
+
+	suite.Require().Equal(expectedCoins, exitPoolRes.TokenOut)
+}

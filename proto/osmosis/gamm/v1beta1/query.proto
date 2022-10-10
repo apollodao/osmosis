@@ -92,6 +92,13 @@ service Query {
     option (google.api.http).get =
         "/osmosis/gamm/v1beta1/{pool_id}/estimate/exit_pool";
   }
+
+  // Estimates the amount of tokens to get from ExitSwapShareAmountInResponse
+  rpc ExitSwapShareAmountIn(QueryExitSwapShareAmountInRequest)
+      returns (QueryExitSwapShareAmountInResponse) {
+    option (google.api.http).get =
+        "/osmosis/gamm/v1beta1/{pool_id}/estimate/exit_swap_share_amount_in";
+  }
 }
 
 //=============================== Pool
@@ -263,8 +270,25 @@ message QueryExitPoolRequest {
   string share_in_amount = 2
       [ (gogoproto.moretags) = "yaml:\"share_in_amount\"" ];
 }
+
 message QueryExitPoolResponse {
   repeated cosmos.base.v1beta1.Coin token_out = 1 [
+    (gogoproto.moretags) = "yaml:\"token_out\"",
+    (gogoproto.nullable) = false
+  ];
+}
+
+//=============================== ExitSwapShareAmountIn
+message QueryExitSwapShareAmountInRequest {
+  uint64 pool_id = 1 [ (gogoproto.moretags) = "yaml:\"pool_id\"" ];
+  string token_out_denom = 2
+      [ (gogoproto.moretags) = "yaml:\"token_out_denom\"" ];
+  string share_in_amount = 3
+      [ (gogoproto.moretags) = "yaml:\"share_in_amount\"" ];
+}
+
+message QueryExitSwapShareAmountInResponse {
+  cosmos.base.v1beta1.Coin token_out = 1 [
     (gogoproto.moretags) = "yaml:\"token_out\"",
     (gogoproto.nullable) = false
   ];

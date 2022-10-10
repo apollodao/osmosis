@@ -400,3 +400,33 @@ func (q Querier) ExitPool(ctx context.Context, req *types.QueryExitPoolRequest) 
 		TokenOut: returnedCoins,
 	}, err
 }
+
+func (q Querier) ExitSwapShareAmountIn(ctx context.Context, req *types.QueryExitSwapShareAmountInRequest) (*types.QueryExitSwapShareAmountInResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	if req.ShareInAmount == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+
+	shareInAmountInt, ok := sdk.NewIntFromString(req.ShareInAmount)
+
+	if !ok {
+		return nil, fmt.Errorf("invalid share in amount")
+	}
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	tokenIn := sdk.NewCoin(req.TokenOutDenom, sdk.ZeroInt())
+
+	returnedCoins, err := q.Keeper.GetExitSwapSharesAmountIn(sdkCtx, req.PoolId, shareInAmountInt, tokenIn)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &types.QueryExitSwapShareAmountInResponse{
+		TokenOut: returnedCoins,
+	}, nil
+}

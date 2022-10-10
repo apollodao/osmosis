@@ -285,3 +285,21 @@ func (k Keeper) GetExitPoolShares(ctx sdk.Context, poolId uint64, shareInAmount 
 
 	return returnedCoins, err
 }
+
+func (k Keeper) GetExitSwapSharesAmountIn(ctx sdk.Context, poolId uint64, shareInMaxAmount sdk.Int, tokenOut sdk.Coin) (sdk.Coin, error) {
+	pool, err := k.GetPoolAndPoke(ctx, poolId)
+
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	extendedPool, _ := pool.(types.PoolAmountOutExtension)
+
+	returnedCoin, err := extendedPool.ExitSwapExactAmountOut(ctx, tokenOut, shareInMaxAmount)
+
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return sdk.NewCoin(tokenOut.Denom, returnedCoin), nil
+}
